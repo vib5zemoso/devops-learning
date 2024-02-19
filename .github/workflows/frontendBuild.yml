@@ -1,0 +1,40 @@
+name: Frontend Build
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontendBuild.yml"
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  frontend-build-test:
+    name: Build and test the Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Cache Node Modules
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ${{ github.workspace }}/frontend/node_modules # Change the path to the node_modules folder.
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}
+
+      - name: Install Dependecies
+        if: steps.cache-npm.outputs.cache-hit != 'true'
+        run: npm install
+
+      - name: Test and coverage
+        run: npm test
+
+      - name: Build application
+        run: npm run build
