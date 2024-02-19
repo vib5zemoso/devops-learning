@@ -9,6 +9,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  packages: write
+
 jobs:
   frontend-build-test:
     name: Build and test the Frontend
@@ -62,7 +65,7 @@ jobs:
         with:
           context: frontend
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}
+          tags: ghcr.io/${{ github.repository_owner }}/devops-learning:${{ github.sha }}
 
 
     

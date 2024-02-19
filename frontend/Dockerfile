@@ -1,13 +1,13 @@
-FROM node:latest as build-stage
-
-RUN mkdir /usr/app
-
-COPY . /usr/app
+FROM node:18-alpine3.17
 
 WORKDIR /usr/app
 
+COPY package*.json /usr/app/
+
 RUN npm install
 
-ENV PATH /usr/src/app/node_modules/.bin:$PATH
+COPY . .
 
-RUN npm run build
+EXPOSE 3000
+
+CMD [ "npm", "start" ]
