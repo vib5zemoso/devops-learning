@@ -41,10 +41,10 @@ jobs:
 
   docker:
     name: Dockerise and Package
+    permissions:
+      packages: write
     runs-on: ubuntu-latest
     needs: frontend-build-test
-    permissions:
-        packages: write
     defaults:
       run:
         working-directory: frontend
