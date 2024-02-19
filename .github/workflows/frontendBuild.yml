@@ -17,24 +17,51 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-      - name: Cache Node Modules
-        id: cache-npm
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ${{ github.workspace }}/frontend/node_modules # Change the path to the node_modules folder.
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}
+    - name: Cache Node Modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ${{ github.workspace }}/frontend/node_modules # Change the path to the node_modules folder.
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}
 
-      - name: Install Dependecies
-        if: steps.cache-npm.outputs.cache-hit != 'true'
-        run: npm install
+    - name: Install Dependecies
+      if: steps.cache-npm.outputs.cache-hit != 'true'
+      run: npm install
 
-      - name: Test and coverage
-        run: npm test
+    - name: Test and coverage
+      run: npm test
 
-      - name: Build application
-        run: npm run build
+    - name: Build application
+      run: npm run build
+
+  docker:
+    name: Dockerise and Package
+    runs-on: ubuntu-latest
+    needs: frontend-build-test
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}
+
+    
