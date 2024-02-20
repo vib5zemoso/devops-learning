@@ -1,0 +1,60 @@
+name: Backend Build
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/backendBuild.yml"
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  packages: write
+
+jobs:
+  backend-build:
+    name: Build and test the Backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 17
+
+    - name: Build project with Maven
+      run: mvn clean package -DskipTests
+
+  docker:
+      name: Docker Job
+      permissions:
+        packages: write
+      runs-on: ubuntu-latest
+      needs:
+        - backend-build
+      steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: backend
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/devops-learning:${{ github.sha }}
+
+
+    
