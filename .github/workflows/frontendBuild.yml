@@ -1,4 +1,5 @@
 name: Frontend Build
+run-name: Frontend deployment update triggered by ${{ github.actor }}.
 on:
   push:
     branches:
@@ -65,7 +66,7 @@ jobs:
         with:
           context: frontend
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/devops-learning:${{ github.sha }}
+          tags: ghcr.io/${{ github.repository_owner }}/devops-learning-frontend:${{ github.sha }}
 
 
     
